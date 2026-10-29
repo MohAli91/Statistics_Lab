@@ -52,7 +52,7 @@ def validate(lineups,strengths,duration,games,weights):
     return p,mark_mean
 
 
-def simulate_games(lineups,strengths,duration,games,seed,weights=(.12,.60,.28)):
+def simulate_games(lineups,strengths,duration,games,seed,weights=(.12,.60,.28),form_shape=None):
     """Return games, player-game points, and complete scoring-event tables.
 
     Games use independent child seeds, so the first k games are reproducible
@@ -61,10 +61,14 @@ def simulate_games(lineups,strengths,duration,games,seed,weights=(.12,.60,.28)):
     under very low scoring rates; this simplified rule is explicitly recorded.
     """
     p,mark_mean=validate(lineups,strengths,duration,games,weights)
-    rates={team:np.asarray(lineups[team]['Expected points / 48 min'],float)*strengths[team]/48/mark_mean for team in TEAMS}
+    if form_shape is not None and (not np.isfinite(form_shape) or not .1<=form_shape<=100):
+        raise ValueError('Game-to-game form shape must be between 0.1 and 100.')
+    base_rates={team:np.asarray(lineups[team]['Expected points / 48 min'],float)*strengths[team]/48/mark_mean for team in TEAMS}
     games_rows=[];player_rows=[];event_rows=[];actual_events=0
     for game,stream in enumerate(np.random.SeedSequence(seed).spawn(games),1):
         rng=np.random.default_rng(stream);points={t:np.zeros(5,dtype=int) for t in TEAMS};local=[]
+        form={t:np.ones(5) if form_shape is None else rng.gamma(form_shape,1/form_shape,5) for t in TEAMS}
+        rates={t:base_rates[t]*form[t] for t in TEAMS}
         def period_events(start,length,ot=0):
             nonlocal actual_events
             batch=[]
@@ -99,7 +103,8 @@ def simulate_games(lineups,strengths,duration,games,seed,weights=(.12,.60,.28)):
         for team in TEAMS:
             for i,value in enumerate(points[team]):
                 player_rows.append({'game':game,'team':team,'player_id':i,'player':str(lineups[team].iloc[i].Player),
-                                    'position':str(lineups[team].iloc[i].Position),'points':int(value)})
+                                    'position':str(lineups[team].iloc[i].Position),'points':int(value),
+                                    'form_multiplier':float(form[team][i])})
         event_rows.extend(local)
     return (pd.DataFrame(games_rows),pd.DataFrame(player_rows),pd.DataFrame(event_rows,columns=EVENT_COLUMNS))
 

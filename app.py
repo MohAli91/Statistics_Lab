@@ -12,6 +12,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from scipy import stats
 from basketball_ui import render_basketball_experiment
+from practical_clt_ui import render_practical_clt
 from engine import (EXPERIMENTS, DISTRIBUTIONS, probabilities, draw, distribution, moments,
                     density, is_discrete, simulate, sampling, raw_records,
                     confidence_coverage, testing, resample)
@@ -426,6 +427,7 @@ def playback():
                 x=np.sort(g.value);fig.add_trace(go.Scatter(x=np.r_[0,x],y=np.r_[1,1-np.arange(1,len(x)+1)/len(x)],name=pop,line=dict(color=COLORS[pop],shape='hv')))
             st.plotly_chart(figure_layout(fig,'Empirical survival probability',260),use_container_width=True,key='survival')
         hist_and_summary(visible,meta,show_truth)
+        render_practical_clt(visible,prefix='experiment_clt',label=meta['kind']+' recorded outcome',default_enabled=True)
     elif meta['section'] in ['CLT & sampling','Distribution explorer']:
         clt_view(visible,meta,show_truth)
         hist_and_summary(visible,meta,False)

@@ -15,6 +15,7 @@ import plotly.graph_objects as go
 import streamlit as st
 import streamlit.components.v1 as components
 from scipy import stats
+from practical_clt_ui import render_practical_clt
 from basketball_game import (TEAMS,TEAM_COLORS,default_lineups,simulate_games,player_summary,standings,STARTERS,JERSEYS,LINEUP_AS_OF)
 
 ASSETS=Path(__file__).parent/'assets'
@@ -302,6 +303,16 @@ def game_workbench():
             f=px.bar(averages,x='player',y='average_points',color='team',color_discrete_map=TEAM_COLORS)
             st.plotly_chart(charts_layout(f,'Observed average points per player',280),use_container_width=True,key='bb_player_avg')
     else:st.info('Complete a game to begin the season statistics and relative-frequency plots.')
+    st.divider()
+    choices=[(team,i,row['Player']) for team in TEAMS for i,row in enumerate(settings['lineups'][team])]
+    selected_index=st.selectbox('Select player for points and X̄',list(range(len(choices))),
+        format_func=lambda k:f'{choices[k][0]} · {choices[k][2]}',key='bb_clt_player')
+    selected_team,selected_id,selected_name=choices[selected_index]
+    player_data=pdone[(pdone.team==selected_team)&(pdone.player_id==selected_id)]
+    clt_data=pd.DataFrame({'population':[f'{selected_team} · {selected_name}']*len(player_data),
+                          'trial':player_data.game.to_numpy(),'value':player_data.points.to_numpy()})
+    render_practical_clt(clt_data,prefix='bb_clt',label=f'{selected_name} points per game',
+                         colors={f'{selected_team} · {selected_name}':TEAM_COLORS[selected_team]},default_enabled=True)
     with st.expander('Current game scoring timeline and play-by-play'):
         if seen.empty:st.caption('No scoring plays revealed yet.')
         else:
@@ -337,6 +348,14 @@ def render_basketball_experiment():
         with a:G=st.number_input('Number of games',1,5000,100,key='bb_games')
         with b:T=st.number_input('Regulation game length T (minutes)',1.,96.,48.,1.,key='bb_T')
         with c:seed=st.number_input('Basketball random seed',0,2**32-1,42,key='bb_seed')
+        form_model=st.selectbox('Player scoring form across games',
+            ['Constant scoring rates (original model)','Exponential game-to-game scoring form','Gamma game-to-game scoring form'],key='bb_form_model')
+        form_shape=None
+        if form_model=='Exponential game-to-game scoring form':form_shape=1.
+        elif form_model=='Gamma game-to-game scoring form':
+            form_shape=st.number_input('Gamma form shape (smaller = more skew)',.1,100.,2.,.1,key='bb_form_shape')
+        if form_shape is not None:
+            st.caption('Each player receives an independent positive form multiplier per game, held fixed through overtime. Shape 1 is exponential. Resulting POINTS are discrete, skewed mixed compound-Poisson counts, not an exact continuous exponential distribution. Mean regulation scoring is preserved, but greater variability can increase Knicks upsets.')
         weights_text=st.text_input('Weights for 1-, 2-, and 3-point scoring plays','12,60,28',key='bb_weights')
         try:
             weights=np.array([float(x.strip()) for x in weights_text.split(',')])
@@ -347,16 +366,16 @@ def render_basketball_experiment():
                 expect[team]=float(means.sum()*strengths[team]*T/48)
             st.write(f'Expected regulation scores: **76ers {expect["76ers"]:.1f} — Knicks {expect["Knicks"]:.1f}**')
             variance=(expect['76ers']+expect['Knicks'])*second/m
-            if variance>0:
+            if variance>0 and form_shape is None:
                 approx=stats.norm.cdf((expect['Knicks']-expect['76ers'])/np.sqrt(variance))
                 st.caption(f'Rough normal approximation to a Knicks regulation win: {approx:.1%}. This is a model approximation, not a guarantee or a fitted NBA prediction; ties and overtime change the final-game probability.')
             if preset=='Philadelphia favored' and expect['Knicks']>=expect['76ers']:st.warning('Your edits removed Philadelphia’s expected scoring advantage. Lower Knicks strength or player means to make their wins rare again.')
             if st.button('Generate Knicks–76ers games',type='primary',key='bb_generate'):
                 with st.spinner('Generating games and scoring plays…'):
-                    g,p,e=simulate_games(lineups,strengths,T,int(G),int(seed),weights)
-                settings={'experiment':'Knicks vs. 76ers','model':'independent compound-Poisson player scoring processes',
+                    g,p,e=simulate_games(lineups,strengths,T,int(G),int(seed),weights,form_shape=form_shape)
+                settings={'experiment':'Knicks vs. 76ers','model':'independent compound-Poisson player scoring processes' if form_shape is None else 'independent mixed compound-Poisson player scoring processes',
                           'duration_min':T,'games':int(G),'seed':int(seed),'scoring_weights':weights.tolist(),
-                          'strengths':strengths,'lineups':{team:lineups[team].to_dict('records') for team in TEAMS},
+                          'scoring_form':form_model,'form_shape':form_shape,'strengths':strengths,'lineups':{team:lineups[team].to_dict('records') for team in TEAMS},
                           'created_utc':datetime.now(timezone.utc).isoformat(),'schema_version':2,'lineup_as_of':LINEUP_AS_OF}
                 st.session_state.bb_run=dict(games=g,players=p,events=e,settings=settings,completed=0,display_game=1,elapsed=0.,playing=False)
         except (ValueError,TypeError,OverflowError) as exc:st.error(str(exc))
@@ -364,7 +383,7 @@ def render_basketball_experiment():
     if st.session_state.get('bb_run') is not None:migrate_starter_names(st.session_state.bb_run)
     game_workbench()
     with st.expander('Model assumptions and team-logo sources'):
-        st.markdown('Only the five configured starters score. Their independent scoring rates are constant through regulation and overtime. The model omits defense interactions, substitutions, possessions, fatigue, and real player statistics. After 20 tied overtimes an explicitly flagged sudden-death extension resolves the game. Default names use verified starting-lineup sources as of October 28, 2026. Game-day starters can vary; names remain editable.')
+        st.markdown('Only the five configured starters score. The original model uses constant independent scoring rates. Optional exponential/gamma game form scales each player’s rate independently once per game; that multiplier remains fixed through overtime. The model omits defense interactions, substitutions, possessions, fatigue, and real player statistics. After 20 tied overtimes an explicitly flagged sudden-death extension resolves the game. Default names use verified starting-lineup sources as of October 28, 2026. Game-day starters can vary; names remain editable.')
         st.markdown('Actual team logos are bundled from the NBA official CDN: [76ers logo](https://cdn.nba.com/logos/nba/1610612755/primary/L/logo.svg) · [Knicks logo](https://cdn.nba.com/logos/nba/1610612752/primary/L/logo.svg). Team names and logos belong to their respective owners.')
 
     with st.expander('Starting-lineup references (October 28, 2026)'):
