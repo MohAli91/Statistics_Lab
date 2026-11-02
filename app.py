@@ -13,6 +13,7 @@ import streamlit as st
 from scipy import stats
 from basketball_ui import render_basketball_experiment
 from practical_clt_ui import render_practical_clt
+from sampling_ui import render_sampling_lab
 from engine import (EXPERIMENTS, DISTRIBUTIONS, probabilities, draw, distribution, moments,
                     density, is_discrete, simulate, sampling, raw_records,
                     confidence_coverage, testing, resample)
@@ -462,7 +463,7 @@ def playback():
 st.title('🎲 Applied Statistics Simulation Lab')
 st.caption('Watch randomness. Collect evidence. Compare populations.')
 with st.sidebar:
-    page=st.radio('Laboratory',['Experiments','Distribution explorer','CLT & sampling','Confidence intervals','Testing & power','Resampling','Sampling bias','Regression'],key='page')
+    page=st.radio('Laboratory',['Experiments','Distribution explorer','CLT & sampling','Confidence intervals','Testing & power','Resampling','Sampling bias','Sampling Methods','Regression'],key='page')
     st.divider()
     st.markdown('**Suggested workflow**\n\n1. Predict the outcome.\n2. Set populations and sample size.\n3. Run a small experiment.\n4. Increase the trials.\n5. Explain the evidence and download it.')
     st.caption('Playback is separate from simulated time. A/B populations use independent random-number streams.')
@@ -470,7 +471,7 @@ with st.sidebar:
         st.session_state.pop('run',None)
         st.session_state.pop('bb_run',None)
     if st.button('Clear all session data',key='clear_all'):
-        for data_key in ['run','archive','ci','testing','bias','regression','waits','clt_compare','bb_run']:
+        for data_key in ['run','archive','ci','testing','bias','regression','waits','clt_compare','bb_run','sampling_single','sampling_repeated']:
             st.session_state.pop(data_key,None)
     st.caption('For classroom projection, use browser fullscreen and collapse this sidebar.')
 
@@ -655,6 +656,9 @@ elif page=='Sampling bias':
         st.download_button('Download sampling-bias results CSV',f.to_csv(index=False),'sampling_bias.csv','text/csv')
         st.download_button('Download finite population CSV',pop.to_csv(index=False),'sampling_population.csv','text/csv')
         st.download_button('Download sampling settings JSON',json.dumps(meta,indent=2),'sampling_settings.json','application/json')
+
+elif page=='Sampling Methods':
+    render_sampling_lab()
 
 elif page=='Regression':
     st.subheader('Correlation, noise, and regression')
