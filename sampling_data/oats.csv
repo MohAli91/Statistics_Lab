@@ -1,0 +1,73 @@
+unit_id,source_row,value,stratum,cluster,x,y,x_label,y_label,order,rownames,Block,Variety,nitro,yield
+oats-5,5,117,N=0.0,Block I,0,0,Golden Rain / N=0.0,Block I,0,5,I,Golden Rain,0.0,117
+oats-6,6,114,N=0.2,Block I,1,0,Golden Rain / N=0.2,Block I,1,6,I,Golden Rain,0.2,114
+oats-7,7,161,N=0.4,Block I,2,0,Golden Rain / N=0.4,Block I,2,7,I,Golden Rain,0.4,161
+oats-8,8,141,N=0.6,Block I,3,0,Golden Rain / N=0.6,Block I,3,8,I,Golden Rain,0.6,141
+oats-9,9,105,N=0.0,Block I,4,0,Marvellous / N=0.0,Block I,4,9,I,Marvellous,0.0,105
+oats-10,10,140,N=0.2,Block I,5,0,Marvellous / N=0.2,Block I,5,10,I,Marvellous,0.2,140
+oats-11,11,118,N=0.4,Block I,6,0,Marvellous / N=0.4,Block I,6,11,I,Marvellous,0.4,118
+oats-12,12,156,N=0.6,Block I,7,0,Marvellous / N=0.6,Block I,7,12,I,Marvellous,0.6,156
+oats-1,1,111,N=0.0,Block I,8,0,Victory / N=0.0,Block I,8,1,I,Victory,0.0,111
+oats-2,2,130,N=0.2,Block I,9,0,Victory / N=0.2,Block I,9,2,I,Victory,0.2,130
+oats-3,3,157,N=0.4,Block I,10,0,Victory / N=0.4,Block I,10,3,I,Victory,0.4,157
+oats-4,4,174,N=0.6,Block I,11,0,Victory / N=0.6,Block I,11,4,I,Victory,0.6,174
+oats-17,17,70,N=0.0,Block II,0,1,Golden Rain / N=0.0,Block II,12,17,II,Golden Rain,0.0,70
+oats-18,18,108,N=0.2,Block II,1,1,Golden Rain / N=0.2,Block II,13,18,II,Golden Rain,0.2,108
+oats-19,19,126,N=0.4,Block II,2,1,Golden Rain / N=0.4,Block II,14,19,II,Golden Rain,0.4,126
+oats-20,20,149,N=0.6,Block II,3,1,Golden Rain / N=0.6,Block II,15,20,II,Golden Rain,0.6,149
+oats-21,21,96,N=0.0,Block II,4,1,Marvellous / N=0.0,Block II,16,21,II,Marvellous,0.0,96
+oats-22,22,124,N=0.2,Block II,5,1,Marvellous / N=0.2,Block II,17,22,II,Marvellous,0.2,124
+oats-23,23,121,N=0.4,Block II,6,1,Marvellous / N=0.4,Block II,18,23,II,Marvellous,0.4,121
+oats-24,24,144,N=0.6,Block II,7,1,Marvellous / N=0.6,Block II,19,24,II,Marvellous,0.6,144
+oats-13,13,61,N=0.0,Block II,8,1,Victory / N=0.0,Block II,20,13,II,Victory,0.0,61
+oats-14,14,91,N=0.2,Block II,9,1,Victory / N=0.2,Block II,21,14,II,Victory,0.2,91
+oats-15,15,97,N=0.4,Block II,10,1,Victory / N=0.4,Block II,22,15,II,Victory,0.4,97
+oats-16,16,100,N=0.6,Block II,11,1,Victory / N=0.6,Block II,23,16,II,Victory,0.6,100
+oats-29,29,60,N=0.0,Block III,0,2,Golden Rain / N=0.0,Block III,24,29,III,Golden Rain,0.0,60
+oats-30,30,102,N=0.2,Block III,1,2,Golden Rain / N=0.2,Block III,25,30,III,Golden Rain,0.2,102
+oats-31,31,89,N=0.4,Block III,2,2,Golden Rain / N=0.4,Block III,26,31,III,Golden Rain,0.4,89
+oats-32,32,96,N=0.6,Block III,3,2,Golden Rain / N=0.6,Block III,27,32,III,Golden Rain,0.6,96
+oats-33,33,89,N=0.0,Block III,4,2,Marvellous / N=0.0,Block III,28,33,III,Marvellous,0.0,89
+oats-34,34,129,N=0.2,Block III,5,2,Marvellous / N=0.2,Block III,29,34,III,Marvellous,0.2,129
+oats-35,35,132,N=0.4,Block III,6,2,Marvellous / N=0.4,Block III,30,35,III,Marvellous,0.4,132
+oats-36,36,124,N=0.6,Block III,7,2,Marvellous / N=0.6,Block III,31,36,III,Marvellous,0.6,124
+oats-25,25,68,N=0.0,Block III,8,2,Victory / N=0.0,Block III,32,25,III,Victory,0.0,68
+oats-26,26,64,N=0.2,Block III,9,2,Victory / N=0.2,Block III,33,26,III,Victory,0.2,64
+oats-27,27,112,N=0.4,Block III,10,2,Victory / N=0.4,Block III,34,27,III,Victory,0.4,112
+oats-28,28,86,N=0.6,Block III,11,2,Victory / N=0.6,Block III,35,28,III,Victory,0.6,86
+oats-41,41,64,N=0.0,Block IV,0,3,Golden Rain / N=0.0,Block IV,36,41,IV,Golden Rain,0.0,64
+oats-42,42,103,N=0.2,Block IV,1,3,Golden Rain / N=0.2,Block IV,37,42,IV,Golden Rain,0.2,103
+oats-43,43,132,N=0.4,Block IV,2,3,Golden Rain / N=0.4,Block IV,38,43,IV,Golden Rain,0.4,132
+oats-44,44,133,N=0.6,Block IV,3,3,Golden Rain / N=0.6,Block IV,39,44,IV,Golden Rain,0.6,133
+oats-45,45,70,N=0.0,Block IV,4,3,Marvellous / N=0.0,Block IV,40,45,IV,Marvellous,0.0,70
+oats-46,46,89,N=0.2,Block IV,5,3,Marvellous / N=0.2,Block IV,41,46,IV,Marvellous,0.2,89
+oats-47,47,104,N=0.4,Block IV,6,3,Marvellous / N=0.4,Block IV,42,47,IV,Marvellous,0.4,104
+oats-48,48,117,N=0.6,Block IV,7,3,Marvellous / N=0.6,Block IV,43,48,IV,Marvellous,0.6,117
+oats-37,37,74,N=0.0,Block IV,8,3,Victory / N=0.0,Block IV,44,37,IV,Victory,0.0,74
+oats-38,38,89,N=0.2,Block IV,9,3,Victory / N=0.2,Block IV,45,38,IV,Victory,0.2,89
+oats-39,39,81,N=0.4,Block IV,10,3,Victory / N=0.4,Block IV,46,39,IV,Victory,0.4,81
+oats-40,40,122,N=0.6,Block IV,11,3,Victory / N=0.6,Block IV,47,40,IV,Victory,0.6,122
+oats-53,53,80,N=0.0,Block V,0,4,Golden Rain / N=0.0,Block V,48,53,V,Golden Rain,0.0,80
+oats-54,54,82,N=0.2,Block V,1,4,Golden Rain / N=0.2,Block V,49,54,V,Golden Rain,0.2,82
+oats-55,55,94,N=0.4,Block V,2,4,Golden Rain / N=0.4,Block V,50,55,V,Golden Rain,0.4,94
+oats-56,56,126,N=0.6,Block V,3,4,Golden Rain / N=0.6,Block V,51,56,V,Golden Rain,0.6,126
+oats-57,57,63,N=0.0,Block V,4,4,Marvellous / N=0.0,Block V,52,57,V,Marvellous,0.0,63
+oats-58,58,70,N=0.2,Block V,5,4,Marvellous / N=0.2,Block V,53,58,V,Marvellous,0.2,70
+oats-59,59,109,N=0.4,Block V,6,4,Marvellous / N=0.4,Block V,54,59,V,Marvellous,0.4,109
+oats-60,60,99,N=0.6,Block V,7,4,Marvellous / N=0.6,Block V,55,60,V,Marvellous,0.6,99
+oats-49,49,62,N=0.0,Block V,8,4,Victory / N=0.0,Block V,56,49,V,Victory,0.0,62
+oats-50,50,90,N=0.2,Block V,9,4,Victory / N=0.2,Block V,57,50,V,Victory,0.2,90
+oats-51,51,100,N=0.4,Block V,10,4,Victory / N=0.4,Block V,58,51,V,Victory,0.4,100
+oats-52,52,116,N=0.6,Block V,11,4,Victory / N=0.6,Block V,59,52,V,Victory,0.6,116
+oats-65,65,89,N=0.0,Block VI,0,5,Golden Rain / N=0.0,Block VI,60,65,VI,Golden Rain,0.0,89
+oats-66,66,82,N=0.2,Block VI,1,5,Golden Rain / N=0.2,Block VI,61,66,VI,Golden Rain,0.2,82
+oats-67,67,86,N=0.4,Block VI,2,5,Golden Rain / N=0.4,Block VI,62,67,VI,Golden Rain,0.4,86
+oats-68,68,104,N=0.6,Block VI,3,5,Golden Rain / N=0.6,Block VI,63,68,VI,Golden Rain,0.6,104
+oats-69,69,97,N=0.0,Block VI,4,5,Marvellous / N=0.0,Block VI,64,69,VI,Marvellous,0.0,97
+oats-70,70,99,N=0.2,Block VI,5,5,Marvellous / N=0.2,Block VI,65,70,VI,Marvellous,0.2,99
+oats-71,71,119,N=0.4,Block VI,6,5,Marvellous / N=0.4,Block VI,66,71,VI,Marvellous,0.4,119
+oats-72,72,121,N=0.6,Block VI,7,5,Marvellous / N=0.6,Block VI,67,72,VI,Marvellous,0.6,121
+oats-61,61,53,N=0.0,Block VI,8,5,Victory / N=0.0,Block VI,68,61,VI,Victory,0.0,53
+oats-62,62,74,N=0.2,Block VI,9,5,Victory / N=0.2,Block VI,69,62,VI,Victory,0.2,74
+oats-63,63,118,N=0.4,Block VI,10,5,Victory / N=0.4,Block VI,70,63,VI,Victory,0.4,118
+oats-64,64,113,N=0.6,Block VI,11,5,Victory / N=0.6,Block VI,71,64,VI,Victory,0.6,113
