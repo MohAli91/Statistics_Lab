@@ -117,6 +117,10 @@ def main(raw_dir):
  for item in meta.values():
   raw_name=next(k for k,v in URLS.items() if v==item['download_url']);item['raw_sha256']=hashlib.sha256((raw_dir/raw_name).read_bytes()).hexdigest()
  (root/'sources.json').write_text(json.dumps(meta,indent=2,ensure_ascii=False))
+ import sys
+ sys.path.insert(0,str(root.parent))
+ from engineering_sampling import write_default_populations
+ write_default_populations(root)
  print({key:(v['population_size'],pd.read_csv(root/v['file']).value.mean()) for key,v in meta.items()})
 
 if __name__=='__main__':

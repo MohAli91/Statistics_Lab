@@ -1,6 +1,6 @@
 """Finite-population probability sampling and design-aware teaching inference.
 
-No population values are invented here. Only sample selections are random.
+This module selects from supplied finite frames. Historical and explicitly generated teaching populations share the same design-based sampling calculations.
 Systematic single-start and convenience designs deliberately do not receive
 an unsupported design-based standard error.
 """
@@ -28,7 +28,7 @@ def source_catalog():return json.loads((DATA_DIR/'sources.json').read_text())
 
 def load_population(case):
     meta=source_catalog()[case]
-    f=pd.read_csv(DATA_DIR/meta['file'],dtype={'unit_id':str,'cluster':str,'stratum':str})
+    f=pd.read_csv(DATA_DIR/meta['file'],dtype={'unit_id':str,'cluster':str,'stratum':str,'x_label':str,'y_label':str})
     if not f.unit_id.is_unique or not np.isfinite(f.value).all():raise ValueError('Invalid bundled population.')
     return f,meta
 

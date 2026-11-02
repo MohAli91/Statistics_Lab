@@ -1,4 +1,4 @@
-"""Sampling Methods section with five real-data finite-population scenarios."""
+"""Sampling Methods section for historical and generated engineering populations."""
 from __future__ import annotations
 import hashlib,json
 from datetime import datetime,timezone
@@ -11,6 +11,8 @@ from scipy import stats
 from sampling_engine import (METHODS,SRS,STRAT_PROP,STRAT_EQUAL,SYSTEMATIC,CLUSTER,TWO_STAGE,CONVENIENCE,
                              source_catalog,load_population,collect_sample,repeat_samples,group_variation)
 from sampling_export import sampling_workbook
+from engineering_sampling import ENGINEERING_CASES,generate_engineering_population
+from engineering_visuals import render_scene,engineering_population_plot,render_details
 
 @st.cache_data(show_spinner=False)
 def cached_population(case):return load_population(case)
@@ -19,6 +21,24 @@ def cached_population(case):return load_population(case)
 @st.cache_data(max_entries=4,ttl=600,show_spinner=False)
 def cached_workbook(pop,meta,config,sample=None,summary=None,repeated=None,draws=None,parameters=None):
     return sampling_workbook(pop,meta,config,sample,summary,repeated,draws,parameters)
+
+
+@st.cache_data(max_entries=12,ttl=900,show_spinner=False)
+def cached_engineering_population(case,settings):return generate_engineering_population(case,settings)
+
+
+def engineering_settings(case):
+    with st.expander('Generated population settings',expanded=True):
+        a,b,c=st.columns(3)
+        with a:seed=st.number_input('Population generation seed',0,2**32-1,2026,key='engineering_seed_'+case)
+        with b:between=st.slider('Group / spatial differences',0.,2.,1.,.1,key='engineering_between_'+case)
+        with c:noise=st.slider('Within-group noise multiplier',.25,2.,1.,.05,key='engineering_noise_'+case)
+        settings=dict(seed=int(seed),between_scale=float(between),noise_scale=float(noise))
+        if case=='shafts':settings['periodic']=st.checkbox('Add a period-20 machining problem',False,key='engineering_periodic')
+        if case=='asphalt':settings['thin_patch']=st.checkbox('Include a localized thin patch',True,key='engineering_thin_patch')
+        if case=='concrete':settings['concrete_measure']=st.selectbox('Concrete outcome',['Strength','Slump'],key='engineering_concrete_measure')
+        st.caption('The population seed generates the process outcomes. The sampling seed below selects units from that fixed population. Changing population settings requires new samples. All values and limits are illustrative teaching data.')
+    return settings
 
 
 def layout(fig,title,height=380):
@@ -30,6 +50,7 @@ def layout(fig,title,height=380):
 
 def population_plot(pop,meta,sample=None):
     selected=pop.iloc[:0] if sample is None else sample
+    if meta.get('data_kind')=='generated':return engineering_population_plot(pop,meta,selected)
     if meta['visual']=='map':
         f=go.Figure(go.Scattergl(x=pop.x,y=pop.y,mode='markers',
             customdata=pop[['unit_id','value','stratum','cluster']],
@@ -60,7 +81,7 @@ def inference_controls(prefix,truth):
     with b:alpha=st.select_slider('Test significance α',[.01,.05,.10],value=.05,key=prefix+'_alpha')
     with c:alternative=st.selectbox('Alternative hypothesis',['Two-sided','Greater','Less'],key=prefix+'_alternative')
     null_truth=st.checkbox('Set H₀ mean equal to the known population mean (study Type I error)',True,key=prefix+'_null_true')
-    mu0=st.number_input('Null population mean μ₀',value=float(truth),disabled=null_truth,key=prefix+('_mu0_truth' if null_truth else '_mu0_manual'),format='%.4f')
+    mu0=st.number_input('Null population mean μ₀',value=float(truth),disabled=null_truth,key=prefix+('_mu0_truth_'+hashlib.sha256(str(float(truth)).encode()).hexdigest()[:10] if null_truth else '_mu0_manual'),format='%.4f')
     if null_truth:mu0=float(truth)
     st.caption('Confidence intervals are two-sided. Hypothesis-test tails follow the selected alternative; confidence level and significance level are separate settings.')
     return dict(confidence=level,mu0=mu0,alpha=alpha,alternative=alternative)
@@ -104,11 +125,16 @@ def population_workbench(pop,meta,case,signature):
         if run['shown']==len(run['sample']):run['playing']=False
         st.progress(run['shown']/len(run['sample']),text=f'{run["shown"]} / {len(run["sample"])} selected units collected')
         selected=run['sample'].iloc[:run['shown']]
+    if meta.get('data_kind')=='generated':render_scene(pop,meta,selected)
     st.plotly_chart(population_plot(pop,meta,selected),use_container_width=True,key='sampling_population_plot')
     st.caption(meta['layout']+' Color represents recorded values; similar colors indicate similar values. Red outlines mark collected units.')
+    if meta.get('data_kind')=='generated':render_details(pop,meta,selected)
     if run is not None:
         if run['shown']==len(run['sample']):
             show_single_summary(run)
+            if meta.get('data_kind')=='generated':
+                outside=run['sample'].outside_illustrative_limits.astype(bool)
+                st.caption(f'Collected-sample out-of-limit fraction: {outside.mean():.1%} ({int(outside.sum())}/{len(outside)}). This is a descriptive fraction among collected units, not a design-weighted population estimate or a project acceptance decision.')
             if st.checkbox('Prepare sample Excel workbook',False,key='sampling_prepare_single_excel'):
                 payload=cached_workbook(pop,meta,run['config'],sample=run['sample'],summary=run['summary'],parameters=run['parameters'])
                 st.download_button('Download sample and population · Excel',payload,'sampling_sample.xlsx','application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',key='sampling_single_xlsx')
@@ -188,14 +214,22 @@ def repeated_view(pop,meta,signature):
 
 
 def render_sampling_lab():
-    st.subheader('Sampling Methods · five real-data scenarios')
-    catalog=source_catalog();case=st.selectbox('Sampling scenario',list(catalog),format_func=lambda k:catalog[k]['title'],key='sampling_case')
-    pop,meta=cached_population(case);N=len(pop);H=pop.stratum.nunique();M=pop.cluster.nunique()
+    st.subheader('Sampling Methods · historical and generated engineering cases')
+    catalog=source_catalog()
+    collection=st.selectbox('Scenario collection',['All scenarios','Historical observations','Generated engineering populations'],key='sampling_collection')
+    keys=[k for k,v in catalog.items() if collection=='All scenarios' or (v.get('data_kind')=='generated')==(collection=='Generated engineering populations')]
+    case=st.selectbox('Sampling scenario',keys,format_func=lambda k:catalog[k]['title'],key='sampling_case')
+    if case in ENGINEERING_CASES:
+        generation=engineering_settings(case);pop,meta=cached_engineering_population(case,generation)
+        st.info('GENERATED TEACHING POPULATION — outcomes come from the displayed process model, not from actual construction or manufacturing measurements.')
+    else:pop,meta=cached_population(case)
+    N=len(pop);H=pop.stratum.nunique();M=pop.cluster.nunique()
     st.markdown('**Case question:** '+meta['question']);st.caption(meta['population'])
     st.info('Suggested design: '+meta['recommended']+'. Try alternatives and compare precision, bias, coverage, and the number of units actually measured.')
-    st.markdown(f'**Recorded variable:** {meta["variable"]} ({meta["units"]}). **Population frame:** {N:,} units, {H} strata, {M} clusters.')
+    st.markdown(f'**Outcome variable:** {meta["variable"]} ({meta["units"]}). **Population frame:** {N:,} units, {H} strata, {M} clusters.')
     with st.expander('Sampling design and inference settings',expanded=True):
-        method=st.selectbox('Sampling method',METHODS,key='sampling_method')
+        default_method=meta.get('default_method',SRS)
+        method=st.selectbox('Sampling method',METHODS,index=METHODS.index(default_method),key='sampling_method_'+case)
         config={'method':method}
         if method in [CLUSTER,TWO_STAGE]:
             config['clusters']=st.number_input('Number of groups to select m',2,M,min(4,M),key='sampling_m_'+case)
@@ -215,6 +249,7 @@ def render_sampling_lab():
         with b:R=st.number_input('Number of independent samples R',1,3000,300,key='sampling_R')
         signature=hashlib.sha256(json.dumps([case,meta['csv_sha256'],config,inference],sort_keys=True).encode()).hexdigest()
         parameters={**inference,'seed':int(seed),'repetitions':int(R),'created_utc':datetime.now(timezone.utc).isoformat()}
+        if meta.get('data_kind')=='generated':parameters['population_generation']=meta['model_parameters']
         a,b=st.columns(2)
         if a.button('Collect one sample',type='primary',key='sampling_collect'):
             try:
@@ -259,8 +294,12 @@ def render_sampling_lab():
         st.dataframe(groups,hide_index=True,use_container_width=True)
     repeated_view(pop,meta,signature)
     with st.expander('Source data, definitions, and teaching assumptions'):
-        st.markdown(f'**Source:** {meta["source"]}\n\n[Dataset documentation]({meta["source_url"]})\n\n**Preprocessing:** {meta["preprocessing"]}\n\n**Source terms:** {meta["license"]}')
-        st.caption('All displayed measurements are retained from the cited data. Strata/cluster definitions, bounded teaching frames, and schematic layouts are documented above. Inference targets the bundled finite frame, not future observations, all households, or causal treatment effects.')
+        reference_label='Engineering context reference (not a measured dataset)' if meta.get('data_kind')=='generated' else 'Dataset documentation'
+        st.markdown(f'**Source:** {meta["source"]}\n\n[{reference_label}]({meta["source_url"]})\n\n**Population model / preprocessing:** {meta["preprocessing"]}\n\n**Source terms:** {meta["license"]}')
+        if meta.get('data_kind')=='generated':
+            st.json(meta['model_parameters'],expanded=False)
+            st.caption('Generated values, limit flags, and spatial arrangements are teaching assumptions. Inference concerns this fixed generated population; no result establishes real project compliance.')
+        else:st.caption('All displayed measurements are retained from the cited data. Strata/cluster definitions, bounded teaching frames, and schematic layouts are documented above. Inference targets the bundled finite frame, not future observations, all households, or causal treatment effects.')
         st.dataframe(pop.head(200),hide_index=True,use_container_width=True)
         if st.checkbox('Prepare full population Excel workbook',False,key='sampling_prepare_population'):
             payload=cached_workbook(pop,meta,config,parameters=parameters)

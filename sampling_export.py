@@ -14,11 +14,13 @@ def sampling_workbook(population,metadata,config,sample=None,summary=None,repeat
             ('Population definition',metadata['population']),('Layout',metadata['layout']),
             ('Sampling method',config['method']),('Design settings',json.dumps(config)),
             ('Source attribution',metadata['source']),('Source URL',metadata['source_url']),
-            ('Download URL',metadata['download_url']),('Source license/notes',metadata['license']),
-            ('Preprocessing',metadata['preprocessing']),('Source file SHA256',metadata['raw_sha256']),
+            ('Creation method' if metadata.get('data_kind')=='generated' else 'Download URL', 'engineering_sampling.py; recipe below' if metadata.get('data_kind')=='generated' else metadata['download_url']),('Source license/notes',metadata['license']),
+            ('Preprocessing',metadata['preprocessing']),('Population recipe SHA256' if metadata.get('data_kind')=='generated' else 'Source file SHA256',metadata['raw_sha256']),
             ('Frame CSV SHA256',metadata['csv_sha256']),
             ('Inference','Approximate design-aware t intervals use finite-population corrections. Systematic single-start and convenience inference is available only as explicitly labeled working-SRS analysis.'),
             ('Repeat interpretation','Each replicate redraws a sample independently from the SAME fixed frame. This is not bootstrap sampling from the first sample.')]
+    if metadata.get('data_kind')=='generated':
+        params.extend([('Data kind','Generated teaching population; not field measurements'),('Generation recipe',json.dumps(metadata['model_parameters'])),('Illustrative limits',json.dumps({'lower':metadata.get('lower_limit'),'upper':metadata.get('upper_limit')})),('Process model',metadata['mechanism'])])
     params.extend((str(k),json.dumps(v) if isinstance(v,(dict,list)) else v) for k,v in (parameters or {}).items())
     frames={'Parameters':pd.DataFrame(params,columns=['Setting','Value']),'Population':population}
     if sample is not None:frames['Sample']=sample
